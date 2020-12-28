@@ -109,6 +109,14 @@
             "Disable wikilink definitions generation"
           ]
         },
+        "foam.edit.materializedBacklinks.enabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "foam.edit.materializedBacklinks.header": {
+          "type": "string",
+          "default": "## References"
+        },
         "foam.openDailyNote.fileExtension": {
           "type": "string",
           "scope": "resource",

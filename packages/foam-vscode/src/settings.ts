@@ -7,6 +7,11 @@ export enum LinkReferenceDefinitionsSetting {
   off = "off"
 }
 
+export interface MaterializedBacklinksSettings {
+  enabled: boolean;
+  header: string;
+}
+
 export function getWikilinkDefinitionSetting(): LinkReferenceDefinitionsSetting {
   return workspace
     .getConfiguration("foam.edit")
@@ -14,6 +19,25 @@ export function getWikilinkDefinitionSetting(): LinkReferenceDefinitionsSetting 
       "linkReferenceDefinitions",
       LinkReferenceDefinitionsSetting.withoutExtensions
     );
+}
+
+export function getMaterializedBacklinksEnabled(): boolean {
+  return workspace
+    .getConfiguration("foam.edit.materializedBacklinks")
+    .get<boolean>("enabled", false);
+}
+
+export function getMaterializedBacklinksHeader(): string {
+  return workspace
+    .getConfiguration("foam.edit.materializedBacklinks")
+    .get<string>("header", "## References");
+}
+
+export function getMaterializedBacklinksSettings(): MaterializedBacklinksSettings {
+  return {
+    enabled: getMaterializedBacklinksEnabled(),
+    header: getMaterializedBacklinksHeader()
+  };
 }
 
 /** Retrieve the list of file ignoring globs. */

@@ -19,7 +19,8 @@ import {
   NoteGraphAPI,
   Foam,
   LINK_REFERENCE_DEFINITION_HEADER,
-  LINK_REFERENCE_DEFINITION_FOOTER
+  LINK_REFERENCE_DEFINITION_FOOTER,
+  URI
 } from "foam-core";
 import {
   hasEmptyTrailing,
@@ -31,9 +32,17 @@ import {
 } from "../utils";
 import { FoamFeature } from "../types";
 import {
+  getMaterializedBacklinksHeader,
+  getMaterializedBacklinksSettings,
   getWikilinkDefinitionSetting,
   LinkReferenceDefinitionsSetting
 } from "../settings";
+import { posix } from "path";
+
+export const computeRelativePath = (source: URI, target: URI): string => {
+  const relativePath = posix.relative(posix.dirname(source.path), target.path);
+  return relativePath;
+};
 
 const feature: FoamFeature = {
   activate: async (context: ExtensionContext, foamPromise: Promise<Foam>) => {
@@ -157,10 +166,28 @@ function generateReferenceList(
     ).map(stringifyMarkdownLinkReferenceDefinition)
   );
 
-  if (references.length) {
+  const materializedBacklinks = getMaterializedBacklinksSettings();
+  let backlinks = materializedBacklinks.enabled
+    ? uniq(
+        foam.getBacklinks(note.id).map(backlink => {
+          const note = foam.getNote(backlink.from);
+          const relativePath = computeRelativePath(
+            doc.uri,
+            URI.parse(backlink.from)
+          );
+          return `- [${note.title}](${relativePath})`;
+        })
+      )
+    : [];
+  if (backlinks.length) {
+    backlinks = [materializedBacklinks.header, "", ...backlinks, ""];
+  }
+
+  if (references.length || backlinks.length) {
     return [
       LINK_REFERENCE_DEFINITION_HEADER,
       ...references,
+      ...backlinks,
       LINK_REFERENCE_DEFINITION_FOOTER
     ];
   }
